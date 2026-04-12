@@ -1,0 +1,3 @@
+[submodule "deps/cpptrace"]
+	path = deps/cpptrace
+	url = git@github.com:jeremy-rifkin/cpptrace.git
