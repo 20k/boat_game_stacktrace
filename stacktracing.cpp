@@ -28,8 +28,10 @@ void stacktrace_dump()
 
 void stacktrace_exception_dump()
 {
+    #ifdef DEBUG_SYMBOLS
     std::ofstream out("crash_exception.txt");
 
     cpptrace::from_current_exception().print(out);
     cpptrace::from_current_exception().print();
+    #endif
 }
