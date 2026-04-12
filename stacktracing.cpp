@@ -25,3 +25,11 @@ void stacktrace_dump()
     cpptrace::generate_trace().print();
     #endif
 }
+
+void stacktrace_exception_dump()
+{
+    std::ofstream out("crash_exception.txt");
+
+    cpptrace::from_current_exception().print(out);
+    cpptrace::from_current_exception().print();
+}
