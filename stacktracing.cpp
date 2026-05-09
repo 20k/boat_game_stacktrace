@@ -4,13 +4,27 @@
 #include <iostream>
 #include <cpptrace/cpptrace.hpp>
 #include <cpptrace/from_current.hpp>
+#include <signal.h>
+
+void signal_handler(int signum)
+{
+    ::signal(signum, SIG_DFL);
+
+    stacktrace_dump();
+
+    ::raise(SIGABRT);
+
+    exit(0);
+}
 
 void stacktrace_start()
 {
     #ifdef DEBUG_SYMBOLS
     std::ofstream* crash = new std::ofstream("crash_really_bad.txt");
-
     std::cerr.rdbuf(crash->rdbuf());
+
+    ::signal(SIGSEGV, &signal_handler);
+    ::signal(SIGABRT, &signal_handler);
 
     cpptrace::register_terminate_handler();
     #endif
