@@ -25,6 +25,9 @@ void stacktrace_start()
 
     ::signal(SIGSEGV, &signal_handler);
     ::signal(SIGABRT, &signal_handler);
+    ::signal(SIGINT, &signal_handler);
+    ::signal(SIGILL, &signal_handler);
+    ::signal(SIGFPE, &signal_handler);
 
     cpptrace::register_terminate_handler();
     #endif
