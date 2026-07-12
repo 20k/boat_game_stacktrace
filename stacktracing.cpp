@@ -5,12 +5,36 @@
 #include <cpptrace/cpptrace.hpp>
 #include <cpptrace/from_current.hpp>
 #include <signal.h>
+#include <assert.h>
+#include <atomic>
+
+static std::atomic_bool crashed{false};
+
+#ifdef _WIN32
+#include <windows.h>
+
+LONG WINAPI
+VectoredHandle(
+    struct _EXCEPTION_POINTERS *ExceptionInfo
+)
+{
+    if(crashed)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    stacktrace_dump();
+    crashed = true;
+
+    exit(0);
+    return EXCEPTION_CONTINUE_SEARCH;
+};
+#endif
 
 void signal_handler(int signum)
 {
     ::signal(signum, SIG_DFL);
 
     stacktrace_dump();
+    crashed = true;
 
     ::raise(SIGABRT);
 
@@ -30,6 +54,12 @@ void stacktrace_start()
     ::signal(SIGFPE, &signal_handler);
 
     cpptrace::register_terminate_handler();
+
+    #ifdef _WIN32
+    #ifdef VECTOR
+    AddVectoredExceptionHandler(1, VectoredHandle);
+    #endif
+    #endif
     #endif
 }
 
