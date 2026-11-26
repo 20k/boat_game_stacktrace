@@ -10,6 +10,8 @@
 
 static std::atomic_bool crashed{false};
 
+void (*on_crash)() = nullptr;
+
 #ifdef _WIN32
 #include <windows.h>
 
@@ -24,6 +26,9 @@ VectoredHandle(
     stacktrace_dump();
     crashed = true;
 
+    if(on_crash)
+        on_crash();
+
     exit(0);
     return EXCEPTION_CONTINUE_SEARCH;
 };
@@ -35,6 +40,9 @@ void signal_handler(int signum)
 
     stacktrace_dump();
     crashed = true;
+
+    if(on_crash)
+        on_crash();
 
     ::raise(SIGABRT);
 
@@ -81,4 +89,9 @@ void stacktrace_exception_dump()
     cpptrace::from_current_exception().print(out);
     cpptrace::from_current_exception().print();
     #endif
+}
+
+void stacktrace_set_on_crash(void(*ptr)())
+{
+    on_crash = ptr;
 }
